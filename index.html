@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaspa Breakout Alert</title>
+  <script>
+    const resLevel = 0.20;
+    const alertLvl = 0.205;  // ~2.5% breakout
+    const cooldown = 30 * 60 * 1000;
+    let last = 0;
+
+    async function checkKAS() {
+      try {
+        const res = await fetch(
+          'https://api.coingecko.com/api/v3/simple/price?ids=kaspa&vs_currencies=usd'
+        );
+        const price = (await res.json()).kaspa.usd;
+        const status = document.getElementById("status");
+        const log = document.getElementById("log");
+        const now = new Date().toLocaleTimeString();
+
+        status.innerText = `KAS Price: $${price}`;
+        log.innerHTML += `<div>[${now}] KAS: $${price}</div>`;
+
+        if (price >= alertLvl && Date.now() - last > cooldown) {
+          alert(`🚀 KAS breakout! Harga: $${price} (atas $${resLevel})`);
+          log.innerHTML += `<div style="color:#4ade80">[${now}] 🚨 BREAKOUT ALERT! Price: $${price}</div>`;
+          last = Date.now();
+        }
+      } catch (err) {
+        console.error('Fetch error', err);
+      }
+    }
+
+    setInterval(checkKAS, 60000); // Cek setiap menit
+    window.onload = checkKAS;
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      color: #38bdf8;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    .price-display {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    #status {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+    .alert-info {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid #38bdf8;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .info-item {
+      background: rgba(15, 23, 42, 0.7);
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+    .info-item h3 {
+      color: #38bdf8;
+      margin-bottom: 0.3rem;
+      font-size: 1rem;
+    }
+    .info-item p {
+      color: #e2e8f0;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .log-container {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    #log {
+      font-family: 'Courier New', monospace;
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    #log div {
+      padding: 0.5rem;
+      border-bottom: 1px solid #334155;
+    }
+    #log div:last-child {
+      border-bottom: none;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      padding-top: 1rem;
+      border-top: 1px solid #334155;
+    }
+    .copyright {
+      color: #38bdf8;
+      font-weight: bold;
+    }
+    .tag {
+      background: #38bdf8;
+      color: #0f172a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      .alert-info {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 Kaspa (KAS) Breakout Alert</h1>
+      <p class="subtitle">Real-time monitoring for price breakouts</p>
+    </header>
+
+    <main>
+      <div class="price-display">
+        <p id="status">Checking KAS price...</p>
+      </div>
+
+      <div class="alert-info">
+        <div class="info-item">
+          <h3>Resistance Level</h3>
+          <p>$<span id="res-level">${resLevel}</span></p>
+        </div>
+        <div class="info-item">
+          <h3>Alert Trigger</h3>
+          <p>$<span id="alert-level">${alertLvl}</span></p>
+        </div>
+        <div class="info-item">
+          <h3>Cooldown Period</h3>
+          <p><span id="cooldown">${cooldown/(60*1000)}</span> minutes</p>
+        </div>
+      </div>
+
+      <div class="log-container">
+        <div class="log-header">
+          <h2>Activity Log <span class="tag">LIVE</span></h2>
+          <small>Updates every 60 seconds</small>
+        </div>
+        <div id="log"></div>
+      </div>
+    </main>
+
+    <footer>
+      <p>© <span class="copyright">2025 IjajkeyCyberCrypto</span> - All rights reserved</p>
+      <p>This is a monitoring tool only, not financial advice</p>
+    </footer>
+  </div>
+
+  <script>
+    // Inisialisasi nilai di info panel
+    document.getElementById('res-level').textContent = resLevel;
+    document.getElementById('alert-level').textContent = alertLvl;
+    document.getElementById('cooldown').textContent = cooldown/(60*1000);
+  </script>
+</body>
+</html>
